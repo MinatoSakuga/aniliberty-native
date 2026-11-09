@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ import top.aniliberty.app.data.*
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable fun PlayerScreen(vm: MainViewModel, request: PlayerRequest) {
     val context = LocalContext.current
+    val view = LocalView.current
     val settings by vm.repo.settings.collectAsStateWithLifecycle()
     val release = vm.repo.release(request.releaseId)
     val episodes = vm.repo.episodes(request.releaseId)
@@ -99,18 +101,19 @@ import top.aniliberty.app.data.*
             override fun onPlayerError(e: PlaybackException) { error = "Не удалось загрузить видео. Проверьте интернет или выберите другое качество."; buffering = false }
         }
         player.addListener(listener)
-        onDispose { save(); player.removeListener(listener); player.release() }
+        onDispose { save(); player.removeListener(listener); player.release(); view.keepScreenOn = false }
     }
     LaunchedEffect(request.episode.id, quality, retry) {
         error = null; buffering = true
         val url = request.episode.url(quality)
         if (url == null) { error = "Это качество недоступно"; buffering = false; return@LaunchedEffect }
         val resume = if (player.currentPosition > 1000) player.currentPosition else request.resumeMs
-        val source = HlsMediaSource.Factory(DefaultHttpDataSource.Factory().setUserAgent("AniLibertyNative/1.5 (Android)").setConnectTimeoutMs(20_000).setReadTimeoutMs(30_000).setAllowCrossProtocolRedirects(true)).createMediaSource(MediaItem.fromUri(url))
+        val source = HlsMediaSource.Factory(DefaultHttpDataSource.Factory().setUserAgent("AniLibertyNative/1.8.5 (Android)").setConnectTimeoutMs(20_000).setReadTimeoutMs(30_000).setAllowCrossProtocolRedirects(true)).createMediaSource(MediaItem.fromUri(url))
         player.setMediaSource(source); player.prepare(); if (resume > 0) player.seekTo(resume); player.playWhenReady = true; player.setPlaybackSpeed(speed)
     }
     LaunchedEffect(player) { while (true) { delay(250); if (!seeking) position = player.currentPosition.coerceAtLeast(0); if (player.duration > 0) duration = player.duration; if (Rules.shouldSkipOpening(position, request.episode.opening, settings.skipOpening)) { player.seekTo(((request.episode.opening?.stop ?: 0.0) * 1000).toLong()); vm.repo.message("Опенинг пропущен") } } }
     LaunchedEffect(player) { while (true) { delay(10_000); if (player.isPlaying) save() } }
+    LaunchedEffect(playing, buffering) { view.keepScreenOn = playing || buffering }
     LaunchedEffect(controls, playing) { if (controls && playing) { delay(3800); controls = false } }
     LaunchedEffect(seekFeedback) { if (seekFeedback != null) { delay(800); seekFeedback = null; seekAccum = 0L } }
     val close = { save(); vm.closePlayer() }

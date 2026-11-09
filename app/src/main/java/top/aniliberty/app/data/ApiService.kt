@@ -47,7 +47,7 @@ object Network {
         val client = OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS).readTimeout(25, TimeUnit.SECONDS)
             .cache(Cache(File(cacheDir, "http"), 20L * 1024 * 1024))
-            .addInterceptor { chain -> chain.proceed(chain.request().newBuilder().header("Accept", "application/json").header("User-Agent", "AniLibertyNative/1.8.4").build()) }
+            .addInterceptor { chain -> chain.proceed(chain.request().newBuilder().header("Accept", "application/json").header("User-Agent", "AniLibertyNative/1.8.5").build()) }
             .build()
         return Retrofit.Builder().baseUrl(base).client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType())).build().create(AniLibertyApi::class.java)

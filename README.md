@@ -2,7 +2,7 @@
 
 Нативное Android-приложение каталога аниме [aniliberty.top](https://aniliberty.top): каталог, поиск, расписание, избранное и полноценный плеер. Весь интерфейс — Jetpack Compose, **без WebView**.
 
-**Текущая версия: 1.8.4** (versionCode 14). История изменений — в [CHANGELOG.md](CHANGELOG.md).
+**Текущая версия: 1.8.5** (versionCode 15). История изменений — в [CHANGELOG.md](CHANGELOG.md).
 
 ## Возможности
 
