@@ -1,0 +1,7 @@
+-keepattributes Signature,InnerClasses,EnclosingMethod,*Annotation*
+-keepclassmembers class top.aniliberty.app.data.** { *; }
+-keep class top.aniliberty.app.notifications.EpisodeWorker { public <init>(android.content.Context,androidx.work.WorkerParameters); }
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
